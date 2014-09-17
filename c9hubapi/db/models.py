@@ -39,6 +39,8 @@ class Ide(BASE):
     __tablename__ = 'ide'
     id = Column(Integer, primary_key=True)
     display_name = Column(String(255))
+    username = Column(String(32))
+    password = Column(String(32))
     uuid = Column(UUID())
 
 

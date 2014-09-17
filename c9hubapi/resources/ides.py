@@ -11,7 +11,9 @@ class ACommon(Resource):
 
 ide_fields = {
     'display_name': fields.String,
-    'id': fields.String(attribute='uuid')
+    'id': fields.String(attribute='uuid'),
+    'username': fields.String,
+    'password': fields.String,
 }
 
 
@@ -29,22 +31,22 @@ class Ide(ACommon):
         else:
             return abort(404, error="Unknown ide_id '%s'" % ide_id)
 
-    def update(self, ide_id):
-        self.log.info("Ide.update(ide_id=%s)", ide_id)
-        tmp = models.Ide(display_name='tata', uuid=uuid.uuid4())
-        self.session.add(tmp)
-        self.session.commit()
-        return {'ide_id': tmp.id}
+    # def update(self, ide_id):
+    #     self.log.info("Ide.update(ide_id=%s)", ide_id)
+    #     tmp = models.Ide(display_name='tata', uuid=uuid.uuid4())
+    #     self.session.add(tmp)
+    #     self.session.commit()
+    #     return {'ide_id': tmp.id}
 
 
 class Ides(ACommon):
     def post(self):
         self.log.info("Ides.post()")
         dn = request.json['display_name']
-        tmp = models.Ide(display_name=dn, uuid=uuid.uuid4())
+        tmp = models.Ide(display_name=dn, uuid=uuid.uuid4(), username=None, password=None)
         self.session.add(tmp)
         self.session.commit()
-        return {'id': tmp.id}
+        return {'id': str(tmp.uuid)}
 
     @marshal_with(ide_fields)
     def get(self):
