@@ -2,6 +2,8 @@ from flask.ext.restful import Resource, fields, marshal_with, abort
 from flask import g, request, current_app
 from c9hubapi.db import models
 import uuid
+import docker
+import pdb
 
 class ACommon(Resource):
     def __init__(self):
@@ -46,6 +48,19 @@ class Ides(ACommon):
         tmp = models.Ide(display_name=dn, uuid=uuid.uuid4(), username=None, password=None)
         self.session.add(tmp)
         self.session.commit()
+        c = docker.Client(base_url='unix://var/run/docker.sock',
+                          version='1.14',
+                          timeout=10)
+        env = {"PASSWORD": "xxx"}
+        container_id = c.create_container(
+            image="tai_c9/cloud9:v0",
+            command=None,
+            detach=True, environment=env, ports=None)
+        c.start(container_id, port_bindings={3131: ('0.0.0.0', 3131)})
+
+        res = c.containers(quiet=False, all=False, trunc=True, latest=False, since=None,
+                     before=None, limit=-1)
+        #pdb.set_trace()
         return {'id': str(tmp.uuid)}
 
     @marshal_with(ide_fields)
