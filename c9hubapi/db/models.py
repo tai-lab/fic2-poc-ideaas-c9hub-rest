@@ -38,10 +38,11 @@ class UUID(TypeDecorator):
 class Ide(BASE):
     __tablename__ = 'ide'
     id = Column(Integer, primary_key=True)
-    display_name = Column(String(255))
+    display_name = Column(String(64))
     username = Column(String(32))
     password = Column(String(32))
     uuid = Column(UUID())
+    container_id = Column(String(64))
 
 
     def __repr__(self):
@@ -49,7 +50,7 @@ class Ide(BASE):
 
 
 from sqlalchemy import create_engine
-engine = create_engine('sqlite:////tmp/test.sqlite')
+engine = create_engine('sqlite:////tmp/c9hubapi.sqlite')
  
 from sqlalchemy.orm import sessionmaker
 session = sessionmaker()

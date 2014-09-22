@@ -4,3 +4,6 @@ flask-restful>=0.2.12
 SQLAlchemy>=0.9.7
 Flask-SQLAlchemy>=2.0
 docker-py>=0.5.0
+jsonschema>=2.4.0
+layered-yaml-attrdict-config>=14.09.3
+port-for>=0.3.1
