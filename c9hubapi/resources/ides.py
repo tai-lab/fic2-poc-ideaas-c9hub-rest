@@ -101,6 +101,14 @@ _ides_post_request_schema = {
                 "username",
                 "password"
                 ]
+            },
+        "git_clones": {
+            "type": "array",
+            "items": {
+                "type": "string"
+                },
+            "minItems": 0,
+            "uniqueItems": True
             }
         },
     "additionalProperties": False,
@@ -121,12 +129,13 @@ class Ides(ACommon):
         display_name = request.json['display_name']
         username = request.json.get('credentials',{}).get('username', None)
         password = request.json.get('credentials',{}).get('password', None)
+        git_clones = ' '.join(request.json.get('git_clones', {}))
 
         tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), username=username, password=password)
         c = self.create_docker()
         for i in range(0, 9):
             port = 49000 + (i * 100) + random.randint(0, 9)
-            env = {"C9PORT": port, "C9PASSWORD": tmp.username, "C9USERNAME": tmp.password}
+            env = {"C9PORT": port, "C9PASSWORD": tmp.username, "C9USERNAME": tmp.password, "CLONES": git_clones}
             container = c.create_container(
                 image="tai_c9/cloud9:v0",
                 command=None,
