@@ -51,13 +51,16 @@ class Ide(ACommon):
         except ValueError as e:
             abort(500, error=str(e))
         query = self.session.query(models.Ide).filter_by(uuid=target).first()
-        docker = self.create_docker()
-        docker.stop(query.container_id)
-        docker.wait(query.container_id)
-        docker.remove_container(query.container_id)
-        self.session.delete(query)
-        self.session.commit()
-        return (None, 204, None)
+        if (query):
+            docker = self.create_docker()
+            docker.stop(query.container_id)
+            docker.wait(query.container_id)
+            docker.remove_container(query.container_id)
+            self.session.delete(query)
+            self.session.commit()
+            return (None, 204, None)
+        else:
+            abort(404, error="Unknown ide_id '%s'" % ide_id)
 
     # def update(self, ide_id):
     #     self.log.info("Ide.update(ide_id=%s)", ide_id)
@@ -133,23 +136,35 @@ class Ides(ACommon):
 
         tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), username=username, password=password)
         c = self.create_docker()
-        for i in range(0, 9):
-            port = 49000 + (i * 100) + random.randint(0, 9)
-            env = {"C9PORT": port, "C9PASSWORD": tmp.username, "C9USERNAME": tmp.password, "CLONES": git_clones}
+
+        env = {"C9PASSWORD": tmp.username, "C9USERNAME": tmp.password, "CLONES": git_clones, "C9TIMEOUT": "15m"}
+        try:
             container = c.create_container(
                 image="tai_c9/cloud9:v0",
                 command=None,
-                detach=True, environment=env, ports=[port])
-            try:
-                c.start(container, port_bindings={port: ('0.0.0.0', port)})
-                break
-            except docker.errors.APIError as e:
-                if re.match('Bind for 0.0.0.0:{}'.format(port), str(e)):
-                    continue
-                else:
-                    abort(500, error=str(e))
-        else: # only if no break
-            abort(500, error="No free port available")
+                detach=True, environment=env, ports=[])
+            c.start(container, port_bindings={"3131": ('0.0.0.0',)})
+        except docker.errors.APIError as e:
+            abort(500, error=str(e))
+
+        # for i in range(0, 9):
+        #     port = 49000 + (i * 100) + random.randint(0, 9)
+        #     env = {"C9PORT": port, "C9PASSWORD": tmp.username, "C9USERNAME": tmp.password, "CLONES": git_clones}
+        #     container = c.create_container(
+        #         image="tai_c9/cloud9:v0",
+        #         command=None,
+        #         detach=True, environment=env, ports=[port])
+        #     try:
+        #         c.start(container, port_bindings={port: ('0.0.0.0', port)})
+        #         break
+        #     except docker.errors.APIError as e:
+        #         if re.match('Bind for 0.0.0.0:{}'.format(port), str(e)):
+        #             continue
+        #         else:
+        #             abort(500, error=str(e))
+        # else: # only if no break
+        #     abort(500, error="No free port available")
+
         tmp.container_id = container['Id']
         self.session.add(tmp)
         self.session.commit()
