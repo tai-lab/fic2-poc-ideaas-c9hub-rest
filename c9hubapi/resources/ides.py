@@ -53,9 +53,13 @@ class Ide(ACommon):
         query = self.session.query(models.Ide).filter_by(uuid=target).first()
         if (query):
             docker = self.create_docker()
-            docker.stop(query.container_id)
-            docker.wait(query.container_id)
-            docker.remove_container(query.container_id)
+            try:
+                inspection = docker.inspect_container(query.container_id)
+                docker.stop(query.container_id)
+                docker.wait(query.container_id)
+                docker.remove_container(query.container_id)
+            except docker.errors.APIError as e:
+                pass
             self.session.delete(query)
             self.session.commit()
             return (None, 204, None)
