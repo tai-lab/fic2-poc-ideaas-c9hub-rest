@@ -4,7 +4,7 @@ from c9hubapi.db import models
 import uuid
 import docker
 import pdb
-import re, random
+import re, random, timedelta
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
@@ -116,6 +116,10 @@ _ides_post_request_schema = {
                 },
             "minItems": 0,
             "uniqueItems": True
+            },
+        "timeout": {
+            "type": "string",
+            "pattern": "^[0-9]+([.][0-9]+)?(s|m|h|d)$"
             }
         },
     "additionalProperties": False,
@@ -124,6 +128,19 @@ _ides_post_request_schema = {
         ]
     }
 
+
+def _timeout_to_timedelta(timeout):
+    match = re.search(r'^(\d+(?:[.]\d+)?)(s|m|h|d)$', timeout)
+    if match and match.group(1) and match.group(2):
+        f = float(match.group(1))
+        return {'s': timedelta(seconds=f),
+                'm': timedelta(minutes=f),
+                'h': timedelta(hours=f),
+                'd': timedelta(days=f),
+                }.get(match.group(2), None)
+    else:
+        return None
+    
 
 class Ides(ACommon):
     @marshal_with(ide_fields)
@@ -136,6 +153,10 @@ class Ides(ACommon):
         display_name = request.json['display_name']
         username = request.json.get('credentials',{}).get('username', None)
         password = request.json.get('credentials',{}).get('password', None)
+        timeout = request.json.get('timeout', "15m")
+        timeout_delta = _timeout_to_timedelta(timeout)
+        if ((timeout_delta) is None) or (timeout_delta > timedelta(hours=4)):
+            abort(500, error="Invalid timeout")
         git_clones = ' '.join(request.json.get('git_clones', {}))
 
         c = self.create_docker()
@@ -143,7 +164,7 @@ class Ides(ACommon):
             abort(500, error="The limit of concurrently running ides has been reached.")
 
         tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), username=username, password=password)
-        env = {"C9PASSWORD": tmp.username, "C9USERNAME": tmp.password, "CLONES": git_clones, "C9TIMEOUT": "15m"}
+        env = {"C9PASSWORD": tmp.username, "C9USERNAME": tmp.password, "CLONES": git_clones, "C9TIMEOUT": timeout}
         try:
             container = c.create_container(
                 image="tai_c9/cloud9:v0",
