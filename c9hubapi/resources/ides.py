@@ -138,9 +138,11 @@ class Ides(ACommon):
         password = request.json.get('credentials',{}).get('password', None)
         git_clones = ' '.join(request.json.get('git_clones', {}))
 
-        tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), username=username, password=password)
         c = self.create_docker()
+        if len(c.containers()) > 4:
+            abort(500, error="The limit of concurrently running ides has been reached.")
 
+        tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), username=username, password=password)
         env = {"C9PASSWORD": tmp.username, "C9USERNAME": tmp.password, "CLONES": git_clones, "C9TIMEOUT": "15m"}
         try:
             container = c.create_container(
