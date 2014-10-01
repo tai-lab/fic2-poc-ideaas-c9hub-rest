@@ -1,10 +1,12 @@
 from flask.ext.restful import Resource, fields, marshal_with, abort
 from flask import g, request, current_app, redirect
+from flask.ext.login import login_required, current_user
 from c9hubapi.db import models
 import uuid
 import docker
 import pdb
-import re, random, timedelta
+import re, random
+from datetime import timedelta
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
@@ -27,6 +29,8 @@ ide_fields = {
     'username': fields.String,
     'password': fields.String,
     'container_id': fields.String,
+    'user_id': fields.String,
+    'validation_endpoint_id': fields.String(attribute='validation_endpoint.uuid')
 }
 
 
@@ -144,12 +148,13 @@ def _timeout_to_timedelta(timeout):
 
 class Ides(ACommon):
     @marshal_with(ide_fields)
+    @login_required
     def post(self):
-        self.log.info("Ides.post()")
+        self.log.info("Ides.post() usr={}: {}".format(current_user, request.json))
         try:
             validate(request.json, _ides_post_request_schema)
         except ValidationError as e:
-            abort(500, error=str(e))
+            abort(500, error="Validation error on '{}': {}".format(request.json, str(e)))
         display_name = request.json['display_name']
         username = request.json.get('credentials',{}).get('username', None)
         password = request.json.get('credentials',{}).get('password', None)
@@ -163,7 +168,8 @@ class Ides(ACommon):
         if len(c.containers()) > 4:
             abort(500, error="The limit of concurrently running ides has been reached.")
 
-        tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), username=username, password=password)
+        tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), username=username, password=password,
+                         user_id=current_user.id, validation_endpoint_id=current_user.target_endpoint_id)
         env = {"C9PASSWORD": tmp.username, "C9USERNAME": tmp.password, "CLONES": git_clones, "C9TIMEOUT": timeout}
         try:
             container = c.create_container(
@@ -199,6 +205,7 @@ class Ides(ACommon):
         return tmp
 
     @marshal_with(ide_fields)
+    #@login_required
     def get(self):
         self.log.info("Ides.get()")
         tmp = self.create_docker()
