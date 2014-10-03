@@ -1,4 +1,4 @@
-import sys
+import sys, os, re
 import logging
 from flask import Flask, g, url_for, render_template, request, abort, session, redirect
 from pkg_resources import resource_stream
@@ -16,10 +16,15 @@ cfg = lya.AttrDict.from_yaml(resource_stream('c9hubdashboard.resources.etc', 'c9
 print(' * Configuration ...')
 cfg.dump(sys.stdout)
 
+if os.getenv('C9HUB_API_PORT') is None:
+    raise RuntimeError('Cannont locate the api')
+C9HUB_API_PORT=re.sub('^tcp://', 'http://', os.getenv('C9HUB_API_PORT'))
+print("Api endpoint: {}".format(C9HUB_API_PORT))
+
+
 app = Flask(__name__, static_folder='../static', template_folder='../templates')
 app.secret_key = 'secret_Rdflddos'
 csrf = CsrfProtect(app)
-
 
 
 oauth = OAuth(app)
@@ -43,7 +48,7 @@ remote = oauth.remote_app(
     request_token_params={},
     base_url='https://192.168.103.116:3000',
     request_token_url=None,
-    access_token_url='https://127.0.0.1:3000/oauth/token',
+    access_token_url='https://172.17.42.1:3000/oauth/token',
     access_token_method='POST',
     authorize_url='oauth/authorize'
 )
@@ -75,13 +80,15 @@ def root():
     app.logger.info('root (method={}): {}'.format(request.method, dict(request.args)))
     if get_oauth_token() is None:
         app.logger.info('No token was found, redirecting to authorization server')
-        return remote.authorize(callback=url_for('authorize', next=None, _external=True))
+        #callback = url_for('authorize', next=None, _external=True)
+        callback = "https://{}/authorize".format(request.headers.get('X-Forwarded-Host', '0.0.0.0'))
+        return remote.authorize(callback=callback)
     else:
         f = forms.CreateIdeForm()
         if request.method == 'POST':
             if f.validate_on_submit():
                 target_endpoint_id = None
-                r = requests.get('http://127.0.0.1:3232/v1/validationendpoint')
+                r = requests.get('{}/v1/validationendpoint'.format(C9HUB_API_PORT))
                 if r.status_code == 200:
                     versus = urlparse(remote.access_token_url)
                     for item in r.json():
@@ -104,11 +111,11 @@ def root():
                     'git_clones': f.git_clones.data.split(' ')
                     }
                 app.logger.info('root: making a rest request to the api')
-                r = requests.post('http://127.0.0.1:3232/v1/ide', data=json.dumps(payload), 
+                r = requests.post('{}/v1/ide'.format(C9HUB_API_PORT), data=json.dumps(payload), 
                                   headers={'Authorization': 'Bearer ' + get_oauth_token()[0], 'Content-Type': 'application/json', 'Validation-Endpoint': target_endpoint_id})
                 if r.status_code != 200:
                     return redirect('/failure')
-                r = requests.get('http://127.0.0.1:3232/v1/ide/{}/redirect'.format(r.json()['id']), allow_redirects=False)
+                r = requests.get('{}/v1/ide/{}/redirect'.format(C9HUB_API_PORT, r.json()['id']), allow_redirects=False)
                 if r.status_code == 302:
                     return redirect(r.headers['Location'])
                 else:
@@ -131,8 +138,9 @@ def authorize():
         )
     print(resp)
     session['remote_oauth'] = (resp['access_token'], resp['refresh_token'])
-    return redirect(url_for('root'))
-
+    #return redirect(url_for('root', _scheme="https", _external=True))
+    return redirect("https:{}{}".format(
+            request.headers.get('X-Forwarded-Host', '0.0.0.0'), url_for('root')))
 
 @remote.tokengetter
 def get_oauth_token():
