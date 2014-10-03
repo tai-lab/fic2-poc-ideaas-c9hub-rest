@@ -1,0 +1,11 @@
+FROM {{ base_image }}
+MAINTAINER Tai <tai@thalesgroup.com>
+
+
+USER ubuntu
+ENV HOME /home/ubuntu/workspace
+{% for g in git_clones %}
+RUN git clone {{ g }}
+{% endfor %}
+
+ENV HOME /home/ubuntu/workspace

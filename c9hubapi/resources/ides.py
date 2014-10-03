@@ -9,6 +9,7 @@ import re, random
 from datetime import timedelta
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
+from jinja2 import Template
 
 
 class ACommon(Resource):
@@ -176,9 +177,23 @@ class Ides(ACommon):
                 image="tai_c9/cloud9:v0",
                 command=None,
                 detach=True, environment=env, ports=[])
-            c.start(container, port_bindings={"3131": ('0.0.0.0',)})
+            c.start(container, port_bindings={'3131': ('0.0.0.0',)})
+            inspection = c.inspect_container(container)
+            ip_address = inspection['NetworkSettings']['IPAddress']
         except docker.errors.APIError as e:
             abort(500, error=str(e))
+        content = current_app.jinja_env.get_template('nginx_ide_server.conf').render(id=container['Id'], ip=ip_address)
+        self.log.info('Created nginx location conf: {}'.format(content))
+        a_file=open('/var/tmp/sites-enabled/_ide_{}.conf'.format(container['Id']), 'w+')
+        print(content, file=a_file)
+        a_file.close()
+        for i in c.containers():
+            if i['Names'] == '/frontend-nginx':
+                self.log.info('Sending HUP signal to {}'.format(i['Id']))
+                c.kill(i['Id'], signal='HUP')
+                break
+        else:
+            self.log.info('The nginx container was not found')
 
         # for i in range(0, 9):
         #     port = 49000 + (i * 100) + random.randint(0, 9)

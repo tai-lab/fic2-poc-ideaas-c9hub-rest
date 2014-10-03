@@ -19,7 +19,7 @@ cfg = lya.AttrDict.from_yaml(resource_stream('c9hubapi.resources.etc', 'c9hub.de
 print(' * Configuration ...')
 cfg.dump(sys.stdout)
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates')
 app.secret_key = 'secret_sqdusdh'
 models._register_validation_endpoints(cfg.validation_endpoints)
 api = Api(app)
