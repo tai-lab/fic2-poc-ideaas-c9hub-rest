@@ -78,10 +78,11 @@ def csrf_error(reason):
 @app.route('/', methods=['GET', 'POST'])
 def root():
     app.logger.info('root (method={}): {}'.format(request.method, dict(request.args)))
+    host_ip = request.headers.get('X-Forwarded-Host', '0.0.0.0')
     if get_oauth_token() is None:
         app.logger.info('No token was found, redirecting to authorization server')
         #callback = url_for('authorize', next=None, _external=True)
-        callback = "https://{}/authorize".format(request.headers.get('X-Forwarded-Host', '0.0.0.0'))
+        callback = "https://{}/authorize".format(host_ip)
         return remote.authorize(callback=callback)
     else:
         f = forms.CreateIdeForm()
@@ -115,9 +116,10 @@ def root():
                                   headers={'Authorization': 'Bearer ' + get_oauth_token()[0], 'Content-Type': 'application/json', 'Validation-Endpoint': target_endpoint_id})
                 if r.status_code != 200:
                     return redirect('/failure')
-                r = requests.get('{}/v1/ide/{}/redirect'.format(C9HUB_API_PORT, r.json()['id']), allow_redirects=False)
-                if r.status_code == 302:
-                    return redirect(r.headers['Location'])
+                r = requests.get('{}/v1/ide/{}'.format(C9HUB_API_PORT, r.json()['id']), allow_redirects=False)
+                if r.status_code == 200:
+                    target = r.json()['container_id']
+                    return redirect("https://{}:8080/{}".format(host_ip, target))
                 else:
                     return redirect('/failure')
             else:
