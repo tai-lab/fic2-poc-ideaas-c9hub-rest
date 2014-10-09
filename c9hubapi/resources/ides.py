@@ -48,9 +48,7 @@ class Ide(ACommon):
         except ValueError as e:
             abort(500, error=str(e))
         query = self.session.query(models.Ide).filter_by(uuid=target).first()
-        tmp = _check_current_user_vs(query.user_id, query.validation_endpoint_id)
-        self.log.warning("tmp={}".format(tmp))
-        if not tmp:
+        if not _check_current_user_vs(query.user_id, query.validation_endpoint_id):
             return abort(411)
         if (query is not None):
             return query
