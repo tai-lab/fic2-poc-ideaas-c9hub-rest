@@ -31,17 +31,23 @@ oauth = OAuth(app)
 logging.getLogger('flask_oauthlib').addHandler(logging.StreamHandler())
 logging.getLogger('flask_oauthlib').setLevel(logging.DEBUG)
 
-remote = oauth.remote_app(
-    'doorkeeper-local',
-    consumer_key='a7af4b0df277e0fe7d14d80142ed67f80eb33a55bb77c7fe28614baa8a81c9c8',
-    consumer_secret='428345493f6d1a67f67733ee3a4bfa2ac424622fd6aca18b3c244ce647c30e62',
-    request_token_params={},
-    base_url='https://192.168.103.116:3000',
-    request_token_url=None,
-    access_token_url='https://172.17.42.1:3000/oauth/token',
-    access_token_method='POST',
-    authorize_url='oauth/authorize'
-)
+
+for key, value in cfg.oauth.items():
+    remote = oauth.remote_app(
+        key,
+        consumer_key = value.consumer_key,
+        consumer_secret = value.consumer_secret,
+        request_token_params = value.request_token_params,
+        base_url = value.base_url,
+        request_token_url = value.request_token_url,
+        access_token_url = value.access_token_url,
+        access_token_method = value.access_token_method,
+        authorize_url = value.authorize_url
+        )
+    print("The remote app '{}' has been registered".format(remote.name))
+    break
+else:
+    raise RuntimeError("No remote app configured for OAuth, check the yaml files")
 
 @app.before_request
 def before_request():
