@@ -30,17 +30,7 @@ csrf = CsrfProtect(app)
 oauth = OAuth(app)
 logging.getLogger('flask_oauthlib').addHandler(logging.StreamHandler())
 logging.getLogger('flask_oauthlib').setLevel(logging.DEBUG)
-# remote = oauth.remote_app(
-#     'doorkeeper-local',
-#     consumer_key='a7af4b0df277e0fe7d14d80142ed67f80eb33a55bb77c7fe28614baa8a81c9c8',
-#     consumer_secret='428345493f6d1a67f67733ee3a4bfa2ac424622fd6aca18b3c244ce647c30e62',
-#     request_token_params={}, #{'scope': 'read'},
-#     base_url='http://192.168.103.116:8080/authorize',
-#     request_token_url=None,
-#     access_token_url='https://127.0.0.1:3000/oauth/token',
-#     access_token_method='POST',
-#     authorize_url='https://192.168.103.116:3000/oauth/authorize'
-# )
+
 remote = oauth.remote_app(
     'doorkeeper-local',
     consumer_key='a7af4b0df277e0fe7d14d80142ed67f80eb33a55bb77c7fe28614baa8a81c9c8',
@@ -59,6 +49,8 @@ def before_request():
 
 @app.after_request
 def add_header(response):
+    if response.status_code == 302:
+        app.logger.info("Detecting a redirection; Location: {}".format(response.headers['Location']))
     if request.path.startswith('/static/lib/'):
         return response
     if cfg.debug:
@@ -81,7 +73,6 @@ def root():
     host_ip = request.headers.get('X-Forwarded-Host', '0.0.0.0')
     if get_oauth_token() is None:
         app.logger.info('No token was found, redirecting to authorization server')
-        #callback = url_for('authorize', next=None, _external=True)
         callback = "https://{}/authorize".format(host_ip)
         return remote.authorize(callback=callback)
     else:
@@ -94,7 +85,6 @@ def root():
                     versus = urlparse(remote.access_token_url)
                     for item in r.json():
                         pu = urlparse(item.get('url', ''))
-                        app.logger.error('>>>>>>>>>> {}  VS  {}'.format(versus, pu))
                         if (versus.scheme == pu.scheme and versus.netloc == pu.netloc
                             and item.get('id')):
                             target_endpoint_id = item.get('id')
@@ -125,8 +115,6 @@ def root():
             else:
                 app.logger.info('root: invalid form')
         return render_template('index.html', form=f)
-        #return app.send_static_file('index.html')
-        #return url_for('static', filename='index.html')
 
 
 @app.route('/authorize')
@@ -143,6 +131,7 @@ def authorize():
     #return redirect(url_for('root', _scheme="https", _external=True))
     return redirect("https://{}{}".format(
             request.headers.get('X-Forwarded-Host', '0.0.0.0'), url_for('root')))
+
 
 @remote.tokengetter
 def get_oauth_token():
@@ -165,17 +154,4 @@ def get_oauth_token():
     else:
         session.pop('remote_oauth', None)
         return None
-# grant_type=authorization_code&client_id=a7af4b0df277e0fe7d14d80142ed67f80eb33a55bb77c7fe28614baa8a81c9c8&client_secret=428345493f6d1a67f67733ee3a4bfa2ac424622fd6aca18b3c244ce647c30e62&redirect_uri=http%3A%2F%2F192.168.103.116%3A8080%2Fauthorize&code=6dedc68e0f42b43027f6ea9cc204bbc80612139917774280caa6c6b55274542b
 
-
-
-# @remote.tokengetter
-# def get_oauth_token(access_token=None, refresh_token=None):
-#     if access_token:
-#         return session.get('remote_oauth')
-#     elif refresh_token:
-#         return session.get('refresh_token')
-    
-# @remote.tokensetter
-# def save_token(token, request, *args, **kwargs):
-#     session['remote_oauth'] = (token['access_token'], token['refresh_token'])
