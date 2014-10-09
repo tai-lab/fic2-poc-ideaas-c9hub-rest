@@ -9,5 +9,8 @@ launch_dev_dashboard:
 
 #docker run --name some-nginx -v "$(pwd)/etc/docker/c9hub-nginx/nginx:/etc/nginx" --link 'c9hub-dashboard:c9hub-dashboard' --rm=true -P -t -i 'nginx:1.7.5' /bin/bash
 #-v '/etc/nginx/site-enabled' 
+
+#docker run --rm=true -t -i --name frontend-nginx -v "`pwd`/etc/docker/c9hub-nginx/nginx:/etc/nginx" --volumes-from='c9hub-api' --link 'c9hub-dashboard:c9hub-dashboard' --expose='443' -p '0.0.0.0:443:443' 'tai_ide/nginx:v0' find /var/opt/cloud9 -iname '*default.js'
+#docker run --rm=true -t -i --name frontend-nginx -v "`pwd`/etc/docker/c9hub-nginx/nginx:/etc/nginx" --volumes-from='c9hub-api' --link 'c9hub-dashboard:c9hub-dashboard' --expose='443' --expose 8080 -p '0.0.0.0:443:443' -p '0.0.0.0:8080:8080' 'nginx:1.7.5'
 launch_nginx:
-	docker run --rm=true -t -i --name frontend-nginx -v "`pwd`/etc/docker/c9hub-nginx/nginx:/etc/nginx" --volumes-from='c9hub-api' --link 'c9hub-dashboard:c9hub-dashboard' --expose='443' -p '0.0.0.0:443:443' 'nginx:1.7.5'
+	docker run --rm=true -t -i --name frontend-nginx -v '/var/run/docker.sock:/var/run/docker.sock' -v "`pwd`/etc/docker/c9hub-nginx/nginx:/etc/nginx" -v "`pwd`/etc/docker/c9hub-nginx/app:/app"  --link 'c9hub-dashboard:c9hub-dashboard' --expose='443' --expose '8080' -p '0.0.0.0:443:443' -p '0.0.0.0:8080:8080' 'tai_ide/nginx:v0'

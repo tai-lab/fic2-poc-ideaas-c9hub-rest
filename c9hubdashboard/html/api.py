@@ -139,7 +139,7 @@ def authorize():
     print(resp)
     session['remote_oauth'] = (resp['access_token'], resp['refresh_token'])
     #return redirect(url_for('root', _scheme="https", _external=True))
-    return redirect("https:{}{}".format(
+    return redirect("https://{}{}".format(
             request.headers.get('X-Forwarded-Host', '0.0.0.0'), url_for('root')))
 
 @remote.tokengetter

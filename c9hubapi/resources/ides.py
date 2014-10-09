@@ -2,7 +2,7 @@ from flask.ext.restful import Resource, fields, marshal_with, abort
 from flask import g, request, current_app, redirect
 from flask.ext.login import login_required, current_user
 from c9hubapi.db import models
-import uuid
+import os, uuid
 import docker
 import pdb
 import re, random
@@ -187,13 +187,21 @@ class Ides(ACommon):
         a_file=open('/var/tmp/sites-enabled/_ide_{}.conf'.format(container['Id']), 'w+')
         print(content, file=a_file)
         a_file.close()
-        for i in c.containers():
-            if i['Names'] == '/frontend-nginx':
-                self.log.info('Sending HUP signal to {}'.format(i['Id']))
-                c.kill(i['Id'], signal='HUP')
-                break
-        else:
-            self.log.info('The nginx container was not found')
+        if not os.path.exists('/var/tmp/sites-enabled/referers'):
+            os.makedirs('/var/tmp/sites-enabled/referers')
+        content = current_app.jinja_env.get_template('nginx_ide_referer.conf').render(id=container['Id'], ip=ip_address)
+        self.log.info('Created nginx referer conf: {}'.format(content))
+        a_file=open('/var/tmp/sites-enabled/referers/_ide_{}.conf'.format(container['Id']), 'w+')
+        print(content, file=a_file)
+        a_file.close()
+        # for i in c.containers():
+        #     #pdb.set_trace()
+        #     if '/frontend-nginx' in i['Names']:
+        #         self.log.info('Sending HUP signal to {}'.format(i['Id']))
+        #         c.kill(i['Id'], signal='HUP')
+        #         break
+        # else:
+        #     self.log.info('The nginx container was not found')
 
         # for i in range(0, 9):
         #     port = 49000 + (i * 100) + random.randint(0, 9)
