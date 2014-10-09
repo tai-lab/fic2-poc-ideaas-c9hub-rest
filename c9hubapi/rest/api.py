@@ -20,11 +20,14 @@ print(' * Configuration ...')
 cfg.dump(sys.stdout)
 
 app = Flask(__name__, template_folder='../templates')
-app.secret_key = 'secret_sqdusdh'
+#app.secret_key = 'secret_sqdusdh'
+app.config['SESSION_PROTECTION'] = None
+
 models._register_validation_endpoints(cfg.validation_endpoints)
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+
 
 
 class OAuthUser(UserMixin):
