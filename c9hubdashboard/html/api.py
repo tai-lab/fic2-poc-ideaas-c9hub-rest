@@ -116,7 +116,7 @@ def root():
                                   headers={'Authorization': 'Bearer ' + get_oauth_token()[0], 'Content-Type': 'application/json', 'Validation-Endpoint': target_endpoint_id})
                 if r.status_code != 200:
                     return redirect('/failure')
-                r = requests.get('{}/v1/ide/{}'.format(C9HUB_API_PORT, r.json()['id']), allow_redirects=False)
+                r = requests.get('{}/v1/ide/{}'.format(C9HUB_API_PORT, r.json()['id']), allow_redirects=False, headers={'Authorization': 'Bearer ' + get_oauth_token()[0], 'Content-Type': 'application/json', 'Validation-Endpoint': target_endpoint_id})
                 if r.status_code == 200:
                     target = r.json()['container_id']
                     return redirect("https://{}:8080/{}".format(host_ip, target))
