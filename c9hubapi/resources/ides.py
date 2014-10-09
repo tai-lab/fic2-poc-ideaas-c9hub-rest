@@ -33,10 +33,14 @@ ide_fields = {
     'user_id': fields.String,
     'validation_endpoint_id': fields.String(attribute='validation_endpoint.uuid')
 }
+def _check_current_user_vs(user_id, validation_endpoint_id):
+    return (user_id == current_user.id
+            and validation_endpoint_id == current_user.target_endpoint_id)
 
 
 class Ide(ACommon):
     @marshal_with(ide_fields)
+    @login_required
     def get(self, ide_id):
         self.log.info("Ide.get(ide_id=%s)", ide_id)
         try:
@@ -44,11 +48,16 @@ class Ide(ACommon):
         except ValueError as e:
             abort(500, error=str(e))
         query = self.session.query(models.Ide).filter_by(uuid=target).first()
+        tmp = _check_current_user_vs(query.user_id, query.validation_endpoint_id)
+        self.log.warning("tmp={}".format(tmp))
+        if not tmp:
+            return abort(411)
         if (query is not None):
             return query
         else:
             return abort(404, error="Unknown ide_id '%s'" % ide_id)
 
+    @login_required
     def delete(self, ide_id):
         self.log.info("Ide.delete(ide_id=%s)", ide_id)
         try:
@@ -57,6 +66,8 @@ class Ide(ACommon):
             abort(500, error=str(e))
         query = self.session.query(models.Ide).filter_by(uuid=target).first()
         if (query):
+            if not _check_current_user_vs(query.user_id, query.target_endpoint_id):
+                return abort(401)
             docker = self.create_docker()
             try:
                 inspection = docker.inspect_container(query.container_id)
