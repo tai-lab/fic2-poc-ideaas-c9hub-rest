@@ -1,0 +1,14 @@
+[Unit]
+Description=Docker Registry
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill docker-registry
+ExecStartPre=-/usr/bin/docker rm docker-registry
+ExecStartPre=/usr/bin/docker pull registry:0.8.1
+ExecStart=/usr/bin/docker run --name docker-registry -p 5000:5000 registry:0.8.1
+
+[Install]
+WantedBy=multi-user.target
