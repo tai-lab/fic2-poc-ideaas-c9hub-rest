@@ -191,18 +191,20 @@ class Ides(ACommon):
             ip_address = inspection['NetworkSettings']['IPAddress']
         except docker.errors.APIError as e:
             abort(500, error=str(e))
-        content = current_app.jinja_env.get_template('nginx_ide_server.conf').render(id=container['Id'], ip=ip_address)
-        self.log.info('Created nginx location conf: {}'.format(content))
-        a_file=open('/var/tmp/sites-enabled/_ide_{}.conf'.format(container['Id']), 'w+')
-        print(content, file=a_file)
-        a_file.close()
-        if not os.path.exists('/var/tmp/sites-enabled/referers'):
-            os.makedirs('/var/tmp/sites-enabled/referers')
-        content = current_app.jinja_env.get_template('nginx_ide_referer.conf').render(id=container['Id'], ip=ip_address)
-        self.log.info('Created nginx referer conf: {}'.format(content))
-        a_file=open('/var/tmp/sites-enabled/referers/_ide_{}.conf'.format(container['Id']), 'w+')
-        print(content, file=a_file)
-        a_file.close()
+
+        #content = current_app.jinja_env.get_template('nginx_ide_server.conf').render(id=container['Id'], ip=ip_address)
+        #self.log.info('Created nginx location conf: {}'.format(content))
+        #a_file=open('/var/tmp/sites-enabled/_ide_{}.conf'.format(container['Id']), 'w+')
+        #print(content, file=a_file)
+        #a_file.close()
+        #if not os.path.exists('/var/tmp/sites-enabled/referers'):
+        #    os.makedirs('/var/tmp/sites-enabled/referers')
+        #content = current_app.jinja_env.get_template('nginx_ide_referer.conf').render(id=container['Id'], ip=ip_address)
+        #self.log.info('Created nginx referer conf: {}'.format(content))
+        #a_file=open('/var/tmp/sites-enabled/referers/_ide_{}.conf'.format(container['Id']), 'w+')
+        #print(content, file=a_file)
+        #a_file.close()
+
         # for i in c.containers():
         #     #pdb.set_trace()
         #     if '/frontend-nginx' in i['Names']:

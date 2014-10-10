@@ -2,7 +2,7 @@ all:
 	echo 'WIP'
 
 launch_dev_api:
-	docker run --rm=true -t -i --name 'c9hub-api' -v `pwd`:/usr/src/app --expose='3232' -v '/var/run/docker.sock:/var/run/docker.sock' -v '/var/tmp/sites-enabled' 'tai_ide/hub_common:v0' c9hub-api
+	docker run --rm=true -t -i --name 'c9hub-api' -v `pwd`:/usr/src/app --expose='3232' -v '/var/run/docker.sock:/var/run/docker.sock' 'tai_ide/hub_common:v0' c9hub-api
 
 launch_dev_dashboard:
 	docker run --rm=true -t -i --name 'c9hub-dashboard' -e 'C9HUB_API_CONF_FILEPATH=y.yaml' -v `pwd`:/usr/src/app --expose='8080' --link 'c9hub-api:c9hub-api' 'tai_ide/hub_common:v0' c9hub-dashboard
