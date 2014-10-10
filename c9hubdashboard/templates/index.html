@@ -5,23 +5,72 @@
     <script src="{{ url_for('static', filename='lib/bower_components/ngstorage/ngStorage.js') }}"></script>
     <script src="{{ url_for('static', filename='lib/bower_components/oauth-ng/dist/oauth-ng.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+    <!-- start bootstrap-material-design -->
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/css/ripples.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/css/material-wfont.min.css') }}" rel="stylesheet">
+    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/js/ripples.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/js/material.min.js') }}"></script>
+    <!-- end bootstrap-material-design -->
+
     <title>Hello World!</title>
   </head>
   <body ng-app="app">
-    <div>
-      <p>
-        This is a test.
-      </p>
+    <div class="container">
+      <div class="bs-docs-section">
+	<div class="row">
+	  <div class="col-lg-12">
+	    <div class="page-header">
+	      <h1>IDEaaS</h1>
+	    </div>
+	  </div>
+	  <div class="col-lg-11">
+	    <div class="well bs-component">
+	      <form method="POST" action="/" class="form-horizontal">
+		{{ form.hidden_tag() }}
+		<fieldset>
+		  <legend><i class="icon icon-material-add-box"></i> Spawn an new IDE</legend>
+		  <div class="form-group">
+		    {{ form.display_name.label(for="display_name", class_="col-lg-2 control-label") }}
+		    <div class="col-lg-10">
+		      {{ form.display_name(size=64, maxlength=64, class_="form-control", placeholder="Choose a name for your IDE") }}
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    {{ form.username.label(for="username", class_="col-lg-2 control-label") }}
+		    <div class="col-lg-10">
+		      {{ form.username(size=32, maxlength=32, class_="form-control", placeholder="Choose an username to login into your new IDE") }}
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    {{ form.password.label(for="password", class_="col-lg-2 control-label") }}
+		    <div class="col-lg-10">
+		      {{ form.password(size=32, maxlength=32, class_="form-control", placeholder="Set a password associated to the previous username") }}
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    {{ form.git_clones.label(for="git_clones", class_="col-lg-2 control-label") }}
+		    <div class="col-lg-10">
+		      {{ form.git_clones(size=64, class_="form-control", placeholder="Add some public git repositories's urls") }}
+		      <span class="help-block">This field can be empty. A local git clone will be created automatically for every url, thus populating your workspace. Additional clones can still be added afterwards through the IDE's tools.</span>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <div class="col-lg-10 col-lg-offset-2">
+                      <button class="btn btn-default">Cancel</button>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+		    </div>
+		  </div>
+		</fieldset>
+	      </form>
+	    </div>
+	  </div>
+	</div>
+      </div>
     </div>
-    <hr />
-    <form method="POST" action="/">
-      {{ form.hidden_tag() }}
-      {{ form.display_name.label }} {{ form.display_name(size=64, maxlength=64) }}<br/>
-      {{ form.username.label }} {{ form.username(size=32, maxlength=32) }}<br/>
-      {{ form.password.label }} {{ form.password(size=32, maxlength=32) }}<br/>
-      {{ form.git_clones.label }} {{ form.git_clones(size=64) }}<br/>
-      <input type="submit" value="Go">
-    </form>
     <hr />
     <hr />
     <hr />

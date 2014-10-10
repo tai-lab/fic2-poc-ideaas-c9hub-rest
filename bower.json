@@ -13,6 +13,7 @@
     "tests"
   ],
   "dependencies": {
-    "oauth-ng": "~0.2.6"
+    "oauth-ng": "~0.2.6",
+    "bootstrap-material-design": "latest"
   }
 }
