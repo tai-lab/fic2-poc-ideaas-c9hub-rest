@@ -12,7 +12,16 @@ from flask_wtf.csrf import CsrfProtect
 from urllib.parse import urlparse
 
 
+def __update_configuration(cfg):
+    path = os.getenv('C9HUB_API_CONF_FILEPATH')
+    if path is not None and os.path.isfile(path):
+        print(' * Updating configuration with {}'.format(path))
+        cfg.update_yaml(path)
+    else:
+        print(' * Ignoring configuration {}={}'.format('C9HUB_API_CONF_FILEPATH', path))
+
 cfg = lya.AttrDict.from_yaml(resource_stream('c9hubdashboard.resources.etc', 'c9hubdashboard.default.yaml'))
+__update_configuration(cfg)
 print(' * Configuration ...')
 cfg.dump(sys.stdout)
 
