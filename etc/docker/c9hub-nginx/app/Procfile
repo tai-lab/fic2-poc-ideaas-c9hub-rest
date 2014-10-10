@@ -1,2 +1,2 @@
 nginx: nginx -g 'daemon off;'
-dockergen: docker-gen -watch -only-exposed -notify "nginx -s reload" /app/nginx_ides.tmpl /etc/nginx/sites-enabled/ides.conf
+dockergen: docker-gen -watch -only-exposed -notify "nginx -s reload" /app/nginx_ides.tmpl /var/tmp/sites-enabled/ides.conf

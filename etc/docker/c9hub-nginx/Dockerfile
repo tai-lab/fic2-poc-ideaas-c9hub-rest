@@ -10,7 +10,7 @@ RUN wget --no-check-certificate https://github.com/jwilder/docker-gen/releases/d
     tar -C /usr/local/bin -xvzf docker-gen-linux-amd64-0.3.3.tar.gz && \
     rm docker-gen-linux-amd64-0.3.3.tar.gz
 
-RUN mkdir /app
+RUN mkdir /app /var/tmp/sites-enabled
 WORKDIR /app
 ADD app /app
 ADD nginx /etc/nginx
