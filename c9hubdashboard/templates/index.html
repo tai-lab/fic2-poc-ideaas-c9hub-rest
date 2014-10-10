@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="{{ url_for('static', filename='lib/bower_components/angular/angular.js') }}"></script>
-    <script src="{{ url_for('static', filename='lib/bower_components/ngstorage/ngStorage.js') }}"></script>
-    <script src="{{ url_for('static', filename='lib/bower_components/oauth-ng/dist/oauth-ng.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-
     <!-- start bootstrap-material-design -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/css/ripples.min.css') }}" rel="stylesheet">
@@ -16,7 +11,7 @@
     <script src="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/js/material.min.js') }}"></script>
     <!-- end bootstrap-material-design -->
 
-    <title>Hello World!</title>
+    <title>IDEaaS</title>
   </head>
   <body ng-app="app">
     <div class="container">
@@ -71,33 +66,5 @@
 	</div>
       </div>
     </div>
-    <hr />
-    <hr />
-    <hr />
-    <oauth
-       template="{{ url_for('static', filename='views/templates/default.html') }}"
-       authorize-path="/oauth2/authorize"
-       site="https://account.lab.fi-ware.org"
-       client-id="1011"
-       redirect-uri="http://requestb.in/17jxjsh1"
-       profile-uri="https://account.lab.fi-ware.org/user"
-       scope="read&write">
-    </oauth>
-    <hr />
-    <!-- Application:  -->
-    <!-- name: Doorkeeper Sinatra Client -->
-    <!-- redirect_uri: http://doorkeeper-sinatra.herokuapp.com/callback -->
-    <!-- uid: d85134da29244873571049d6ad693acdb40690a1ff5b75c7daa32342ec5269a6 -->
-    <!-- secret: e1d5ea37f61702a7be9d3808690c505b40239c26d1bb0f9976ca8bf20f24a95f -->
-    <oauth
-       template="{{ url_for('static', filename='views/templates/default.html') }}"
-       
-       site="https://192.168.103.116:3000"
-       client-id="a7af4b0df277e0fe7d14d80142ed67f80eb33a55bb77c7fe28614baa8a81c9c8"
-       redirect-uri="http://192.168.103.116:8080"
-       profile-uri="http://192.168.103.116:8080"
-       >
-    </oauth>
-
   </body>
 </html>
