@@ -14,3 +14,9 @@ launch_dev_dashboard:
 #docker run --rm=true -t -i --name frontend-nginx -v "`pwd`/etc/docker/c9hub-nginx/nginx:/etc/nginx" --volumes-from='c9hub-api' --link 'c9hub-dashboard:c9hub-dashboard' --expose='443' --expose 8080 -p '0.0.0.0:443:443' -p '0.0.0.0:8080:8080' 'nginx:1.7.5'
 launch_nginx:
 	docker run --rm=true -t -i --name frontend-nginx -v '/var/run/docker.sock:/var/run/docker.sock' -v "`pwd`/etc/docker/c9hub-nginx/nginx:/etc/nginx" -v "`pwd`/etc/docker/c9hub-nginx/app:/app"  --link 'c9hub-dashboard:c9hub-dashboard' --expose='443' --expose '8080' -p '0.0.0.0:443:443' -p '0.0.0.0:8080:8080' 'tai_ide/nginx:v0'
+
+build_hub_common:
+	docker build --rm=true -t 'tai_ide/hub_common:v0' .
+
+
+#docker tag tai_ide/hub_common:v0 130.206.85.162:5000/tai_ide/hub_common:v0

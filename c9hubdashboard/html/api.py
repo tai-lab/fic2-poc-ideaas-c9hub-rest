@@ -37,12 +37,16 @@ csrf = CsrfProtect(app)
 
 
 oauth = OAuth(app)
-logging.getLogger('flask_oauthlib').addHandler(logging.StreamHandler())
-logging.getLogger('flask_oauthlib').setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.DEBUG)
+app.logger.setLevel(logging.getLogger().getEffectiveLevel())
+_h1 = logging.StreamHandler(sys.stderr)
+logging.getLogger('flask_oauthlib').addHandler(_h1)
+logging.getLogger('flask_oauthlib').setLevel(logging.getLogger().getEffectiveLevel())
 http.client.HTTPConnection.debuglevel = 1
 requests_log = logging.getLogger("requests.packages.urllib3")
-requests_log.setLevel(logging.DEBUG)
-requests_log.addHandler(logging.StreamHandler())
+requests_log.setLevel(logging.getLogger().getEffectiveLevel())
+requests_log.addHandler(_h1)
+requests_log.propagate = True
 
 
 for key, value in cfg.oauth.items():
@@ -156,7 +160,7 @@ def authorize():
 def get_oauth_token():
     app.logger.info("get_oauth_token: getting or refreshing bearer token")
     tmp = session.get('remote_oauth')
-    if tmp is None:
+    if tmp is None or tmp[1] is None:
         return None
     rf = tmp[1]
     payload = {
@@ -169,7 +173,7 @@ def get_oauth_token():
     if r.status_code == 200:
         app.logger.debug("refresh token response: {}".format(r.text))
         j = r.json()
-        session['remote_oauth'] = (j['access_token'], j['refresh_token'])
+        session['remote_oauth'] = (j['access_token'], j.get('refresh_token', rf))
         return session.get('remote_oauth')
     else:
         session.pop('remote_oauth', None)
