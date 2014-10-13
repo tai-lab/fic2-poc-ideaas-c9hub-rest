@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.DEBUG)
 BASE = declarative_base()
 
 

@@ -56,10 +56,15 @@ def load_user_from_request(request):
     target_url = target_endpoint.url
     target_id = target_endpoint.id
     this_session.close()
-    r = requests.get(target_url,
-                     verify=False,
-                     headers={'Authorization': bearer,
-                              'Content-Type': 'application/json'})
+    if '{}' in target_url:
+        access_token = bearer[len('Bearer '):]
+        r = requests.get(target_url.format(access_token),
+                         verify=False)
+    else:
+        r = requests.get(target_url,
+                         verify=False,
+                         headers={'Authorization': bearer,
+                                  'Content-Type': 'application/json'})
     if r.status_code == 200:
         try:
             if not str(r.json()['id']):
