@@ -10,6 +10,7 @@ from datetime import timedelta
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from jinja2 import Template
+import base64
 
 
 class ACommon(Resource):
@@ -180,7 +181,9 @@ class Ides(ACommon):
 
         tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), username=username, password=password,
                          user_id=current_user.id, validation_endpoint_id=current_user.target_endpoint_id)
-        env = {"C9PASSWORD": tmp.username, "C9USERNAME": tmp.password, "CLONES": git_clones, "C9TIMEOUT": timeout}
+        basic = base64.b64encode("{}:{}".format(tmp.username, tmp.password).encode('ascii'))
+        env = {"C9PASSWORD": tmp.password, "C9USERNAME": tmp.username, "CLONES": git_clones, "C9TIMEOUT": timeout, "C9TRACE": "1", "C9BASIC": "Basic {}".format(basic)}
+        #env = {"CLONES": git_clones, "C9TIMEOUT": timeout}
         try:
             container = c.create_container(
                 image="tai_c9/cloud9:v0",

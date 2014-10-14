@@ -1,19 +1,8 @@
 # ref      
 # &{ID:0fd4aff95303902795f0c610e17abd38593495b8d626c1f441fa3c43743019a2 Addresses:[{IP:172.17.0.125 Port:3131 HostPort:49166}] Gateway:172.17.42.1 Name:kickass_goodall Image:{Registry:tai_c9 Repository:cloud9 Tag:v0} Env:map[C9PASSWORD:toto C9TIMEOUT:15m CLONES:https://github.com/mk-fg/layered-yaml-attrdict-config.git https://github.com/kmike/port-for.git C9USERNAME:toto PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin HOME:/home/ubuntu C9PORT:3131]}
 
-
-  {{ range $host, $containers := groupBy $ "Env.C9PORT" }}
-upstream ides {
-  {{ range $value := $containers }}
-   {{ if (eq $value.Image.Registry "tai_c9") and (eq $value.Image.Repository "cloud9") }}
-     {{ with $x := index $value.Addresses 0 }}
-	server {{ $x.IP }}:{{ $x.Port }};
-     {{ end }}
-   {{ end }}
- {{ end }}
- #server 127.0.0.1:8080;
-}
- {{ end }}
+# range $host, $containers := groupBy $ "Env.C9PORT"
+# range $value := $containers
 
 
 server {
@@ -26,28 +15,46 @@ server {
   ssl_prefer_server_ciphers   on;
 
   {{ range $value := . }}
-    # {{ $value | printf "%+v\n" }}
-    {{ if (eq $value.Image.Registry "tai_c9") and (eq $value.Image.Repository "cloud9") }}
-    {{ with $x := index $value.Addresses 0 }}
-        location /{{ $value.ID }} {
-	  rewrite ^/{{ $value.ID }}[/]?(.*)$ /$1 break;
-	  proxy_pass http://{{ $x.IP}}:{{ $x.Port }};
-	  proxy_set_header X-Forwarded-Host $host;
-       	  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-	  proxy_set_header Referer $http_referer;
-	  proxy_read_timeout 86400;
-	  proxy_http_version 1.1;
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection "upgrade";
-	}
-    {{ end }}
+    # {{ $value.ID }} {{ $value.Name }} {{/* $value | printf "%+v\n" */}}
+    {{ if and (eq $value.Image.Registry "tai_c9") (eq $value.Image.Repository "cloud9") }}
+      {{ with $x := index $value.Addresses 0 }}
+	{{ with $target := print "http://" $x.IP ":" $x.Port}}
+	  {{ if eq $value.Name "backend-static-c9" }}
+	    location = /static/favicon.ico { # plugins-client/cloud9.core/www
+	      proxy_pass {{ $target }};
+	    }
+	    location /static/ext/main { # plugins-client/ext.main
+	      proxy_pass {{ $target }};
+	    }
+	    location /static/ace { # plugins-client/lib.ace/www
+	      proxy_pass {{ $target }};
+	    }
+	    location /static/ext/revisions { # plugins-client/ext.revisions
+	      proxy_pass {{ $target }};
+	    }
+	  {{ else }}
+	    location ^~ /{{ $value.ID }} {
+	      rewrite ^/{{ $value.ID }}[/]?(.*)$ /$1 break;
+	      proxy_pass {{ $target }};
+	      proxy_set_header X-Forwarded-Host $host;
+	      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	      proxy_set_header Referer $http_referer;
+	      proxy_read_timeout 86400;
+	      proxy_http_version 1.1;
+	      proxy_set_header Upgrade $http_upgrade;
+	      proxy_set_header Connection "upgrade";
+	    }
+	  {{ end }}
+	{{ end }}
+      {{ end }}
     {{ end }}
   {{ end }}
 
   location / {
     {{ range $value := . }}
-      {{ if (eq $value.Image.Registry "tai_c9") and (eq $value.Image.Repository "cloud9") }}
-        if ($http_referer ~* "^https://.+/{{ $value.ID }}" ) {
+      {{ if and (eq $value.Image.Registry "tai_c9") (and (eq $value.Image.Repository "cloud9") (ne $value.Name "backend-static-c9")) }}
+        if ($http_referer ~* "^https://.+/{{ $value.ID }}") # {{ $value.Name }} 
+	{
 	  rewrite ^(.*)$ /{{ $value.ID }}$1 last;
 	}
       {{ end }}
@@ -55,18 +62,5 @@ server {
     
     return 406;
   }
-{{ range $host, $containers := groupBy $ "Env.C9PORT" }}
-  location = /static/favicon.ico { # plugins-client/cloud9.core/www
-    proxy_pass http://ides;
-  }
-  location /static/ext/main { # plugins-client/ext.main
-    proxy_pass http://ides;
-  }
-  location /static/ace { # plugins-client/lib.ace/www
-    proxy_pass http://ides;
-  }
-  location /static/ext/revisions { # plugins-client/ext.revisions
-    proxy_pass http://ides;
-  }
-{{end}}
+
 }
