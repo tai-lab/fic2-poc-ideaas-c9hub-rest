@@ -22,4 +22,4 @@ build_hub_common:
 #docker tag tai_ide/hub_common:v0 130.206.85.162:5000/tai_ide/hub_common:v0
 
 launch_static:
-	docker run -d --name 'backend-static-c9' 'tai_c9/cloud9:v0' ./start_c9.sh
+	docker run -d --name 'backend-static-c9' -e 'C9TRACE=1' 'tai_c9/cloud9:v0' ./start_c9.sh

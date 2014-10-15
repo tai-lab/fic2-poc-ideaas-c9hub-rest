@@ -13,27 +13,15 @@ server {
   ssl_session_timeout  5m;
   ssl_ciphers  HIGH:!aNULL:!MD5;
   ssl_prefer_server_ciphers   on;
+  #rewrite_log on;
 
   {{ range $value := . }}
     # {{ $value.ID }} {{ $value.Name }} {{/* $value | printf "%+v\n" */}}
     {{ if and (eq $value.Image.Registry "tai_c9") (eq $value.Image.Repository "cloud9") }}
       {{ with $x := index $value.Addresses 0 }}
 	{{ with $target := print "http://" $x.IP ":" $x.Port}}
-	  {{ if eq $value.Name "backend-static-c9" }}
-	    location = /static/favicon.ico { # plugins-client/cloud9.core/www
-	      proxy_pass {{ $target }};
-	    }
-	    location /static/ext/main { # plugins-client/ext.main
-	      proxy_pass {{ $target }};
-	    }
-	    location /static/ace { # plugins-client/lib.ace/www
-	      proxy_pass {{ $target }};
-	    }
-	    location /static/ext/revisions { # plugins-client/ext.revisions
-	      proxy_pass {{ $target }};
-	    }
-	  {{ else }}
-	    location ^~ /{{ $value.ID }} {
+	  {{ if ne $value.Name "backend-static-c9" }}
+	    location /{{ $value.ID }} {
 	      rewrite ^/{{ $value.ID }}[/]?(.*)$ /$1 break;
 	      proxy_pass {{ $target }};
 	      proxy_set_header X-Forwarded-Host $host;
@@ -59,7 +47,31 @@ server {
 	}
       {{ end }}
     {{ end }}
-    
+
+    {{ range $value := . }}
+      {{ if and (eq $value.Image.Registry "tai_c9") (and (eq $value.Image.Repository "cloud9") (eq $value.Name "backend-static-c9")) }}
+        {{ with $x := index $value.Addresses 0 }}
+	  {{ with $target := print "http://" $x.IP ":" $x.Port}}
+	    location = /static/favicon.ico { # plugins-client/cloud9.core/www
+	      proxy_pass {{ $target }};
+	    }
+	    location /static/ext/main { # plugins-client/ext.main
+	      proxy_pass {{ $target }};
+	    }
+	    location /static/ace { # plugins-client/lib.ace/www
+	      proxy_pass {{ $target }};
+	    }
+	    location /static/ext/revisions { # plugins-client/ext.revisions
+	      proxy_pass {{ $target }};
+	    }
+	    location /static { # plugins-client/ext.revisions
+	      proxy_pass {{ $target }};
+	    }
+	  {{end}}
+	{{end}}
+      {{end}}
+    {{end}}
+
     return 406;
   }
 
