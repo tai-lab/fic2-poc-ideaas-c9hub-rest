@@ -1,0 +1,8 @@
+docker run -d --name 'c9hub-api' --expose='3232' -v '/var/run/docker.sock:/var/run/docker.sock' '10.0.5.241:5000/tai_ide/hub_common:v0' c9hub-api
+
+
+docker run -d --name 'c9hub-dashboard' -e 'C9HUB_API_CONF_FILEPATH=/tmp/y.yaml' -v `pwd`/y.yaml:/tmp/y.yaml --expose='8080' --link 'c9hub-api:c9hub-api' '10.0.5.241:5000/tai_ide/hub_common:v0' c9hub-dashboard
+
+docker run -d --name 'backend-static-c9' -e 'C9TRACE=1' 'tai_c9/cloud9:v0' ./start_c9.sh
+
+docker run --rm=true -t -i --name frontend-nginx -v '/var/run/docker.sock:/var/run/docker.sock'  --link 'c9hub-dashboard:c9hub-dashboard' --expose='443' --expose '8080' -p '0.0.0.0:443:443' -p '0.0.0.0:8080:8080' '10.0.5.241:5000/tai_ide/nginx:v0'
