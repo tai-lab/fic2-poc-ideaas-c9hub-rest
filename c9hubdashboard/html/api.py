@@ -131,8 +131,9 @@ def root():
                     return redirect('/failure')
                 r = requests.get('{}/v1/ide/{}'.format(C9HUB_API_PORT, r.json()['id']), allow_redirects=False, headers={'Authorization': 'Bearer ' + get_oauth_token()[0], 'Content-Type': 'application/json', 'Validation-Endpoint': target_endpoint_id})
                 if r.status_code == 200:
-                    target = r.json()['container_id']
-                    return redirect("https://{}:8080/{}".format(host_ip, target))
+                    target_id = r.json()['container_id']
+                    target_url = "https://{}:8080/{}".format(host_ip, target_id)
+                    return redirect(url_for('waitingroom', _scheme="https", _external=True, target=target_url))
                 else:
                     return redirect('/failure')
             else:
@@ -154,6 +155,16 @@ def authorize():
     #return redirect(url_for('root', _scheme="https", _external=True))
     return redirect("https://{}{}".format(
             request.headers.get('X-Forwarded-Host', '0.0.0.0'), url_for('root')))
+
+
+@app.route('/waitingroom')
+def waitingroom():
+    app.logger.info("waitingroom: {}".format(request.headers))
+    target = request.args.get('target', None)
+    if not target:
+        abort(404)
+    else:
+        return render_template('waitingroom.html', target=target)
 
 
 @remote.tokengetter
