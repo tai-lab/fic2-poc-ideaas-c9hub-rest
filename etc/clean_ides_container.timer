@@ -1,0 +1,12 @@
+[Unit]
+Description=Timer on clean_ides_container.service
+
+[Timer]
+Persistent=true     
+# Time to wait after booting before we run first time
+OnBootSec=3min
+# Time between running each consecutive time
+OnUnitActiveSec=3m
+
+[Install]
+WantedBy=clean_ides_container.target

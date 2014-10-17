@@ -1,0 +1,102 @@
+From 84b66f8b32376cec6de58abde86aef5e57732e8b Mon Sep 17 00:00:00 2001
+From: geoffroy <you@example.com>
+Date: Thu, 16 Oct 2014 14:51:17 +0200
+Subject: [PATCH] Tweak to use thin for ssl support
+
+---
+ Gemfile                           | 2 ++
+ Gemfile.lock                      | 9 ++++++++-
+ Makefile                          | 4 ++++
+ config/environments/production.rb | 2 +-
+ db/seeds.rb                       | 2 +-
+ 5 files changed, 16 insertions(+), 3 deletions(-)
+ create mode 100644 Makefile
+
+diff --git a/Gemfile b/Gemfile
+index 7f263e3..aa6fc05 100644
+--- a/Gemfile
++++ b/Gemfile
+@@ -21,3 +21,5 @@ group :development, :test do
+   gem 'sqlite3'
+   gem 'rspec-rails', '~> 2.8.1'
+ end
++
++gem 'thin'
+diff --git a/Gemfile.lock b/Gemfile.lock
+index b5bc6ae..b0ecafa 100644
+--- a/Gemfile.lock
++++ b/Gemfile.lock
+@@ -39,7 +39,8 @@ GEM
+     coffee-script (2.2.0)
+       coffee-script-source
+       execjs
+-    coffee-script-source (1.1.3)
++    coffee-script-source (1.8.0)
++    daemons (1.1.9)
+     devise (1.5.1)
+       bcrypt-ruby (~> 3.0)
+       orm_adapter (~> 0.0.3)
+@@ -48,6 +49,7 @@ GEM
+     doorkeeper (0.5.0.rc1)
+       railties (~> 3.1)
+     erubis (2.7.0)
++    eventmachine (1.0.3)
+     execjs (1.2.9)
+       multi_json (~> 1.0)
+     faker (1.0.1)
+@@ -119,6 +121,10 @@ GEM
+       rack (~> 1.0)
+       tilt (~> 1.1, != 1.3.0)
+     sqlite3 (1.3.4)
++    thin (1.6.2)
++      daemons (>= 1.0.9)
++      eventmachine (>= 1.0.0)
++      rack (>= 1.0.0)
+     thor (0.14.6)
+     tilt (1.3.3)
+     treetop (1.4.12)
+@@ -147,4 +153,5 @@ DEPENDENCIES
+   rspec-rails (~> 2.8.1)
+   sass-rails (~> 3.1.4)
+   sqlite3
++  thin
+   uglifier (>= 1.0.3)
+diff --git a/Makefile b/Makefile
+new file mode 100644
+index 0000000..237f2dd
+--- /dev/null
++++ b/Makefile
+@@ -0,0 +1,4 @@
++all: run
++
++run:
++	thin --debug --trace start --ssl -p 3000
+diff --git a/config/environments/production.rb b/config/environments/production.rb
+index d865939..f9c0abe 100644
+--- a/config/environments/production.rb
++++ b/config/environments/production.rb
+@@ -31,7 +31,7 @@ DoorkeeperProvider::Application.configure do
+   config.force_ssl = true
+ 
+   # See everything in the log (default is :info)
+-  # config.log_level = :debug
++  config.log_level = :debug
+ 
+   # Use a different logger for distributed setups
+   # config.logger = SyslogLogger.new
+diff --git a/db/seeds.rb b/db/seeds.rb
+index ef14fc6..0f6680c 100644
+--- a/db/seeds.rb
++++ b/db/seeds.rb
+@@ -4,7 +4,7 @@ end
+ 
+ User.create! :email => "user@example.com", :password => "doorkeeper", :password_confirmation => "doorkeeper"
+ 
+-app = Doorkeeper::Application.create! :name => "Doorkeeper Sinatra Client", :redirect_uri => "http://doorkeeper-sinatra.herokuapp.com/callback"
++app = Doorkeeper::Application.create! :name => "Doorkeeper Sinatra Client", :redirect_uri => "http://192.168.103.116:8080/authorize"
+ 
+ puts "Application: "
+ puts "name: #{app.name}"
+-- 
+1.9.1
+

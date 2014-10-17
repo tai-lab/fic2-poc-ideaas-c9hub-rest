@@ -1,0 +1,10 @@
+oauth:
+  doorkeeper-local:
+    consumer_key: '1011'
+    consumer_secret: '41969de9199593df97d85710ee956ad64d870095e87a03196cc1753b83a1e2cf3242bcd03f035adaac619d9eab76025de023b93e7c1f658ccc2f49d499767ef5'
+    request_token_params: {}
+    base_url: 'https://account.lab.fi-ware.org'
+    request_token_url: !
+    access_token_url: 'https://account.lab.fi-ware.org/oauth2/token'
+    access_token_method: 'POST'
+    authorize_url: 'oauth2/authorize'

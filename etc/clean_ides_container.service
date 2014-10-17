@@ -1,0 +1,6 @@
+[Unit]
+Description=Clean the exited ides containers
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bash -c "docker ps -a | grep 'tai_c9/cloud9:v0' | grep Exit | cut -d ' ' -f 1 | xargs docker rm"
