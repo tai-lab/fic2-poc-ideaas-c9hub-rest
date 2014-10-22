@@ -9,7 +9,7 @@ import json
 from flask_oauthlib.client import OAuth
 from c9hubdashboard.forms import forms
 from flask_wtf.csrf import CsrfProtect
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 
 
 def __update_configuration(cfg):
@@ -72,8 +72,9 @@ def before_request():
 
 @app.after_request
 def add_header(response):
-    if response.status_code == 302:
-        app.logger.info("Detecting a redirection; Location: {}".format(response.headers['Location']))
+    app.logger.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {}, {}".format(response.status_code, response.headers))
+    if response.status_code in [301, 302, 303, 307]:
+        app.logger.info("Detecting a redirection {}; Location: {}".format(response.status_code, response.headers['Location']))
     if request.path.startswith('/static/lib/'):
         return response
     if cfg.debug:
@@ -165,6 +166,20 @@ def waitingroom():
         abort(404)
     else:
         return render_template('waitingroom.html', target=target)
+
+
+@app.route('/rewire')
+def rewire():
+    app.logger.info("rewire: {}".format(request.headers))
+    host_ip = request.headers.get('X-Forwarded-Host', '0.0.0.0')
+    code = request.args.get('code', None)
+    state = request.args.get('state', None)
+    if not code or not state or not host_ip:
+        abort(404)
+    else:
+        #return redirect("https://{}{}".format(
+        #        request.headers.get('X-Forwarded-Host', '0.0.0.0'), url_for('root')))
+        return redirect("https://{}:8080/{}/api/coauth/authorize?{}".format(host_ip, state, urlencode({'code': code})))
 
 
 @remote.tokengetter
