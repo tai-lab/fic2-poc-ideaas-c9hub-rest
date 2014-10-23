@@ -28,8 +28,9 @@ class ACommon(Resource):
 ide_fields = {
     'display_name': fields.String,
     'id': fields.String(attribute='uuid'),
-    'username': fields.String,
-    'password': fields.String,
+    'authorizationURL': fields.String,
+    'tokenURL': fields.String,
+    'callbackURL': fields.String,
     'container_id': fields.String,
     'user_id': fields.String,
     'validation_endpoint_id': fields.String(attribute='validation_endpoint.uuid')
@@ -112,17 +113,18 @@ _ides_post_request_schema = {
     "type" : "object",
     "properties" : {
         "display_name" : {"type" : "string"},
-        "credentials": {
+        "oauth" : {
             "type" : "object",
             "properties" : {
-                "username" : {"type" : "string"},
-                "password" : {"type" : "string"},
+                "authorizationURL" : { "type" : "string" },
+                "tokenURL" : { "type" : "string" },
+                "clientID" : { "type" : "string" },
+                "clientSecret" : { "type" : "string" },
+                "callbackURL" : { "type" : "string" }
                 },
             "additionalProperties": False,
-            "required": [
-                "username",
-                "password"
-                ]
+            "required": ["authorizationURL", "tokenURL", "clientID",
+                         "clientSecret", "callbackURL"]
             },
         "git_clones": {
             "type": "array",
@@ -167,8 +169,11 @@ class Ides(ACommon):
         except ValidationError as e:
             abort(500, error="Validation error on '{}': {}".format(request.json, str(e)))
         display_name = request.json['display_name']
-        username = request.json.get('credentials',{}).get('username', None)
-        password = request.json.get('credentials',{}).get('password', None)
+        authorizationURL = request.json.get('oauth',{}).get('authorizationURL', None)
+        tokenURL = request.json.get('oauth',{}).get('tokenURL', None)
+        clientID = request.json.get('oauth',{}).get('clientID', None)
+        clientSecret = request.json.get('oauth',{}).get('clientSecret', None)
+        callbackURL = request.json.get('oauth',{}).get('callbackURL', None)
         timeout = request.json.get('timeout', "15m")
         timeout_delta = _timeout_to_timedelta(timeout)
         if ((timeout_delta) is None) or (timeout_delta > timedelta(hours=4)):
@@ -179,10 +184,16 @@ class Ides(ACommon):
         if len(c.containers()) > 8:
             abort(500, error="The limit of concurrently running ides has been reached.")
 
-        tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), username=username, password=password,
+        tmp = models.Ide(display_name=display_name, uuid=uuid.uuid4(), authorizationURL=authorizationURL,
+                         tokenURL=tokenURL, clientID=clientID, clientSecret=clientSecret, callbackURL=callbackURL,
                          user_id=current_user.id, validation_endpoint_id=current_user.target_endpoint_id)
-        basic = base64.b64encode("{}:{}".format(tmp.username, tmp.password).encode('ascii'))
-        env = {"C9PASSWORD": tmp.password, "C9USERNAME": tmp.username, "CLONES": git_clones, "C9TIMEOUT": timeout, "C9TRACE": "1", "C9BASIC": "Basic {}".format(basic)}
+        extra_conf_clear = (current_app.jinja_env.get_template('cloud9_extra_conf.json').render(
+            authorizationURL=authorizationURL, tokenURL=tokenURL, clientID=clientID,
+            clientSecret=clientSecret, callbackURL=callbackURL,
+            validationEndpoint=current_user.target_endpoint_url,
+            authorizedId=current_user.id))
+        extra_conf_encoded = base64.b64encode(extra_conf_clear.encode('ascii')).decode('ascii')
+        env = {"C9PASSWORD": "tmp.password", "C9USERNAME": "tmp.username", "CLONES": git_clones, "C9TIMEOUT": timeout, "C9TRACE": "1", "C9EXTRACONFIG": extra_conf_encoded}
         #env = {"CLONES": git_clones, "C9TIMEOUT": timeout}
         try:
             container = c.create_container(

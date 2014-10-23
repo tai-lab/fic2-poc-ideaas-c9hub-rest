@@ -44,8 +44,11 @@ class Ide(BASE):
     __tablename__ = 'ide'
     id = Column(Integer, primary_key=True)
     display_name = Column(String(64))
-    username = Column(String(32))
-    password = Column(String(32))
+    authorizationURL = Column(UnicodeText)
+    tokenURL = Column(UnicodeText)
+    clientID = Column(String(64))
+    clientSecret = Column(String(64))
+    callbackURL = Column(UnicodeText)
     uuid = Column(UUID())
     container_id = Column(String(64))
     user_id = Column(String(64))

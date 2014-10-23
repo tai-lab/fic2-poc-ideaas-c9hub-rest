@@ -9,7 +9,7 @@ import json
 from flask_oauthlib.client import OAuth
 from c9hubdashboard.forms import forms
 from flask_wtf.csrf import CsrfProtect
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlparse, urlencode, urljoin
 
 
 def __update_configuration(cfg):
@@ -61,6 +61,8 @@ for key, value in cfg.oauth.items():
         access_token_method = value.access_token_method,
         authorize_url = value.authorize_url
         )
+    remote.app_ides_key = value.app_ides_key
+    remote.app_ides_secret = value.app_ides_secret
     print("The remote app '{}' has been registered".format(remote.name))
     break
 else:
@@ -119,9 +121,12 @@ def root():
                     return redirect('/no_endpoint')
                 payload = {
                     'display_name': f.display_name.data,
-                    'credentials': {
-                        'username': f.username.data,
-                        'password': f.password.data
+                    'oauth': {
+                        'authorizationURL': urljoin(remote.base_url, remote.authorize_url),
+                        'tokenURL': remote.access_token_url,
+                        'clientID': 'a8881bba94348cde6f10530cca55167d3251031f7b185801d63081496ae73b95',
+                        'clientSecret': 'd41d990536244639e5657d890f7c6d5ab4929a411ea17fd2f2a354668d8a682e',
+                        'callbackURL': "https://{}{}".format(host_ip, url_for('rewire'))
                         },
                     'git_clones': f.git_clones.data.split(' ')
                     }

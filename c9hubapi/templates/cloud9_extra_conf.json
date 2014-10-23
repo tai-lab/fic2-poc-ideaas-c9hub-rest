@@ -1,0 +1,12 @@
+{ "./tai.connect.custom-oauth": {
+  "oauth": {
+    "authorizationURL": "{{authorizationURL}}",
+    "tokenURL": "{{tokenURL}}",
+    "clientID": "{{clientID}}",
+    "clientSecret": "{{clientSecret}}",
+    "callbackURL": "{{callbackURL}}",
+    "validationEndpoint": "{{validationEndpoint}}",
+    "authorizedId": "{{authorizedId}}" 
+    }     
+  }
+}

@@ -12,3 +12,5 @@ oauth:
     access_token_url: 'https://172.17.42.1:3000/oauth/token'
     access_token_method: 'POST'
     authorize_url: 'oauth/authorize'
+    app_ides_key: 'a8881bba94348cde6f10530cca55167d3251031f7b185801d63081496ae73b95'
+    app_ides_secret: 'd41d990536244639e5657d890f7c6d5ab4929a411ea17fd2f2a354668d8a682e'

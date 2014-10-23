@@ -31,9 +31,10 @@ login_manager.init_app(app)
 
 
 class OAuthUser(UserMixin):
-    def __init__(self, id, target_endpoint_id):
+    def __init__(self, id, target_endpoint_id, target_endpoint_url):
         self.id = str(id)
         self.target_endpoint_id = target_endpoint_id
+        self.target_endpoint_url = target_endpoint_url
 
 # @login_manager.user_loader
 # def load_user(userid):
@@ -70,7 +71,7 @@ def load_user_from_request(request):
             if not str(r.json()['id']):
                 raise ValueError()
             id = str(r.json()['id'])
-            return OAuthUser(id, target_id)
+            return OAuthUser(id, target_id, target_url)
         except (ValueError, KeyError) as _:
             app.logger.error("load_user_from_request: invalid parsing of the user id")
     return None
