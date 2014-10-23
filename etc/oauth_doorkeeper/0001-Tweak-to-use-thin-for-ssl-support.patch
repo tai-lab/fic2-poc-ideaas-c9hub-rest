@@ -1,7 +1,7 @@
 From 84b66f8b32376cec6de58abde86aef5e57732e8b Mon Sep 17 00:00:00 2001
 From: geoffroy <you@example.com>
 Date: Thu, 16 Oct 2014 14:51:17 +0200
-Subject: [PATCH] Tweak to use thin for ssl support
+Subject: [PATCH 1/2] Tweak to use thin for ssl support
 
 ---
  Gemfile                           | 2 ++

@@ -1,0 +1,41 @@
+From b66690699eac4e140dffb1f6a25302d94ac0dc01 Mon Sep 17 00:00:00 2001
+From: geoffroy <you@example.com>
+Date: Thu, 23 Oct 2014 16:35:11 +0200
+Subject: [PATCH 2/2] Adding a new app in seeds
+
+---
+ db/seeds.rb | 20 ++++++++++++++------
+ 1 file changed, 14 insertions(+), 6 deletions(-)
+
+diff --git a/db/seeds.rb b/db/seeds.rb
+index 0f6680c..e59128e 100644
+--- a/db/seeds.rb
++++ b/db/seeds.rb
+@@ -4,10 +4,18 @@ end
+ 
+ User.create! :email => "user@example.com", :password => "doorkeeper", :password_confirmation => "doorkeeper"
+ 
+-app = Doorkeeper::Application.create! :name => "Doorkeeper Sinatra Client", :redirect_uri => "http://192.168.103.116:8080/authorize"
++app_dashboard = Doorkeeper::Application.create! :name => "Doorkeeper Sinatra Client", :redirect_uri => "http://192.168.103.116:8080/authorize"
+ 
+-puts "Application: "
+-puts "name: #{app.name}"
+-puts "redirect_uri: #{app.redirect_uri}"
+-puts "uid: #{app.uid}"
+-puts "secret: #{app.secret}"
++app_c9_ides = Doorkeeper::Application.create! :name => "Cloud9 Ides Client", :redirect_uri => "http://192.168.103.116:8080/rewire"
++
++puts "Application app: "
++puts "name: #{app_dashboard.name}"
++puts "redirect_uri: #{app_dashboard.redirect_uri}"
++puts "uid: #{app_dashboard.uid}"
++puts "secret: #{app_dashboard.secret}"
++
++puts "Application app_c9_ides: "
++puts "name: #{app_c9_ides.name}"
++puts "redirect_uri: #{app_c9_ides.redirect_uri}"
++puts "uid: #{app_c9_ides.uid}"
++puts "secret: #{app_c9_ides.secret}"
+-- 
+1.9.1
+
