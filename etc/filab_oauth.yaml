@@ -8,3 +8,5 @@ oauth:
     access_token_url: 'https://account.lab.fi-ware.org/oauth2/token'
     access_token_method: 'POST'
     authorize_url: 'oauth2/authorize'
+    app_ides_key: '1223'
+    app_ides_secret: '4ccf8f8fe6d28fe5f9ebd2626f11e380af1536b320b07495d7f988260fec8c69df11765eb362139a681ad4a0f60e8f481cfb77e0d5dc9c01f2f30e9d8e585e9b'

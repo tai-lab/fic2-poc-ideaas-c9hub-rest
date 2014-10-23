@@ -124,8 +124,8 @@ def root():
                     'oauth': {
                         'authorizationURL': urljoin(remote.base_url, remote.authorize_url),
                         'tokenURL': remote.access_token_url,
-                        'clientID': 'a8881bba94348cde6f10530cca55167d3251031f7b185801d63081496ae73b95',
-                        'clientSecret': 'd41d990536244639e5657d890f7c6d5ab4929a411ea17fd2f2a354668d8a682e',
+                        'clientID': remote.app_ides_key,
+                        'clientSecret': remote.app_ides_secret,
                         'callbackURL': "https://{}{}".format(host_ip, url_for('rewire'))
                         },
                     'git_clones': f.git_clones.data.split(' ')
