@@ -16,15 +16,10 @@
 		  </div>
 		</div>
 		<div class="form-group">
-		  {{ form.username.label(for="username", class_="col-lg-2 control-label") }}
+		  {{ form.timeout.label(for="timeout", class_="col-lg-2 control-label") }}
 		  <div class="col-lg-10">
-		    {{ form.username(size=32, maxlength=32, class_="form-control", placeholder="Choose an username to login into your new IDE") }}
-		  </div>
-		</div>
-		<div class="form-group">
-		  {{ form.password.label(for="password", class_="col-lg-2 control-label") }}
-		  <div class="col-lg-10">
-		    {{ form.password(size=32, maxlength=32, class_="form-control", placeholder="Set a password associated to the previous username") }}
+		    {{ form.timeout(class_="form-control") }}
+		    <span class="help-block">The IDE will be destroyed when this time limit is reached</span>
 		  </div>
 		</div>
 		<div class="form-group">

@@ -119,6 +119,7 @@ def root():
                     return redirect('/failure')
                 if target_endpoint_id is None:
                     return redirect('/no_endpoint')
+                timeout = f.timeout.data if f.timeout.data in ['15m', '1h', '2h', '3h'] else '15m'
                 payload = {
                     'display_name': f.display_name.data,
                     'oauth': {
@@ -128,7 +129,8 @@ def root():
                         'clientSecret': remote.app_ides_secret,
                         'callbackURL': "https://{}{}".format(host_ip, url_for('rewire'))
                         },
-                    'git_clones': f.git_clones.data.split(' ')
+                    'git_clones': f.git_clones.data.split(' '),
+                    'timeout': timeout
                     }
                 app.logger.info('root: making a rest request to the api')
                 r = requests.post('{}/v1/ide'.format(C9HUB_API_PORT), data=json.dumps(payload), 
