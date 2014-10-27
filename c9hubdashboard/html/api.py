@@ -132,6 +132,14 @@ def root():
                     'git_clones': f.git_clones.data.split(' '),
                     'timeout': timeout
                     }
+                if (f.setup_cf.data):
+                    payload['cf'] = {
+                        'apiEndpoint': f.cf_api_endpoint.data,
+                        'username': f.cf_username.data,
+                        'password': f.cf_password.data,
+                        'org': f.cf_org.data,
+                        'space': f.cf_spc.data
+                        }
                 app.logger.info('root: making a rest request to the api')
                 r = requests.post('{}/v1/ide'.format(C9HUB_API_PORT), data=json.dumps(payload), 
                                   headers={'Authorization': 'Bearer ' + get_oauth_token()[0], 'Content-Type': 'application/json', 'Validation-Endpoint': target_endpoint_id})

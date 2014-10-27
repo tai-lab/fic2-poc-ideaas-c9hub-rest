@@ -137,6 +137,18 @@ _ides_post_request_schema = {
         "timeout": {
             "type": "string",
             "pattern": "^[0-9]+([.][0-9]+)?(s|m|h|d)$"
+            },
+        "cf": {
+            "type": "object",
+            "properties" : {
+                "apiEndpoint" : { "type" : "string" },
+                "username" : { "type" : "string" },
+                "password" : { "type" : "string" },
+                "org" : { "type" : "string" },
+                "space" : { "type" : "string" }
+                },
+            "additionalProperties": False,
+            "required": ["apiEndpoint", "username", "password", "org", "space"]
             }
         },
     "additionalProperties": False,
@@ -179,6 +191,7 @@ class Ides(ACommon):
         if ((timeout_delta) is None) or (timeout_delta > timedelta(hours=4)):
             abort(500, error="Invalid timeout")
         git_clones = ' '.join(request.json.get('git_clones', {}))
+        cf_vars = request.json.get('cf', None)
 
         c = self.create_docker()
         if len(c.containers()) > 8:
@@ -194,6 +207,12 @@ class Ides(ACommon):
             authorizedId=current_user.id))
         extra_conf_encoded = base64.b64encode(extra_conf_clear.encode('ascii')).decode('ascii')
         env = {"C9PASSWORD": "tmp.password", "C9USERNAME": "tmp.username", "CLONES": git_clones, "C9TIMEOUT": timeout, "C9TRACE": "1", "C9EXTRACONFIG": extra_conf_encoded}
+        if (cf_vars):
+            env['C9CFEND'] = cf_vars.get('apiEndpoint')
+            env['C9CFUSR'] = cf_vars.get('username')
+            env['C9CFPASS'] = cf_vars.get('password')
+            env['C9CFORG'] = cf_vars.get('org')
+            env['C9CFSPC'] = cf_vars.get('space')
         #env = {"CLONES": git_clones, "C9TIMEOUT": timeout}
         try:
             container = c.create_container(
