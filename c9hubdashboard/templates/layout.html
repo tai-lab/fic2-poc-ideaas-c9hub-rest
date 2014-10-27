@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" style="overflow-y: scroll;">
   <head>
     <!-- start bootstrap-material-design -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
@@ -16,11 +16,30 @@
     <title>IDEaas - {% block title %}{% endblock %}</title>
   </head>
   <body>
-    <div class="container">
-      <div id="banner" class="page-header">
-        <h1>IDEaaS</h1>
-        <p class="lead">By TAI</p>
+    <div class="navbar navbar-default">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">IDEaaS</a>
       </div>
+      <div class="navbar-collapse collapse navbar-responsive-collapse">
+        <ul class="nav navbar-nav">
+	  {% for url in [{'t': 'Index', 'l':'Create', 'a':'/'}, {'t': 'Listing', 'l':'Listing', 'a':'listing'}] %}
+	    {% if url.t == self.title() %}
+	      <li class="active"><a href="{{url.a}}">{{url.l}}</a></li>
+	    {% else %}
+	      <li><a href="{{url.a}}">{{url.l}}</a></li>
+	    {% endif %}            
+	  {% endfor %}
+        </ul>
+	<ul class="nav navbar-nav navbar-right">
+          <li><a href="https://www.thalesgroup.com">by TAI</a></li>
+	</ul>
+      </div>
+    </div>
+    <div class="container">
       {% block section %}{% endblock %}
     </div>
   </body>

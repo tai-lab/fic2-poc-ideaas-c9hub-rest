@@ -93,6 +93,18 @@ def teardown_request(exception):
 def csrf_error(reason):
     abort(400, {'error': 'Invalid csrf: {}'.format(reason)})
 
+def _fetch_validation_endpoint():
+    r = requests.get('{}/v1/validationendpoint'.format(C9HUB_API_PORT))
+    if r.status_code == 200:
+        versus = urlparse(remote.access_token_url)
+        for item in r.json():
+            pu = urlparse(item.get('url', ''))
+            if (versus.scheme == pu.scheme and versus.netloc == pu.netloc
+                and item.get('id')):
+                return item.get('id')
+    else:
+        return None
+
 @app.route('/', methods=['GET', 'POST'])
 def root():
     app.logger.info('root (method={}): {}'.format(request.method, dict(request.args)))
@@ -105,18 +117,7 @@ def root():
         f = forms.CreateIdeForm()
         if request.method == 'POST':
             if f.validate_on_submit():
-                target_endpoint_id = None
-                r = requests.get('{}/v1/validationendpoint'.format(C9HUB_API_PORT))
-                if r.status_code == 200:
-                    versus = urlparse(remote.access_token_url)
-                    for item in r.json():
-                        pu = urlparse(item.get('url', ''))
-                        if (versus.scheme == pu.scheme and versus.netloc == pu.netloc
-                            and item.get('id')):
-                            target_endpoint_id = item.get('id')
-                            break
-                else:
-                    return redirect('/failure')
+                target_endpoint_id = _fetch_validation_endpoint()
                 if target_endpoint_id is None:
                     return redirect('/no_endpoint')
                 timeout = f.timeout.data if f.timeout.data in ['15m', '1h', '2h', '3h'] else '15m'
@@ -197,6 +198,26 @@ def rewire():
         return redirect("https://{}:8080/{}/api/coauth/authorize?{}".format(host_ip, state, urlencode({'code': code})))
 
 
+
+@app.route('/listing', methods=['GET'])
+def listing():
+    app.logger.info('listing (method={}): {}'.format(request.method, dict(request.args)))
+    host_ip = request.headers.get('X-Forwarded-Host', '0.0.0.0')
+    if get_oauth_token() is None:
+        app.logger.info('No token was found, redirecting to authorization server')
+        callback = "https://{}/authorize".format(host_ip)
+        return remote.authorize(callback=callback)
+    else:
+        ides = []
+        target_endpoint_id = _fetch_validation_endpoint()
+        if target_endpoint_id is not None:
+            r = requests.get('{}/v1/ide'.format(C9HUB_API_PORT),
+                             headers={'Authorization': 'Bearer ' + get_oauth_token()[0], 'Content-Type': 'application/json', 'Validation-Endpoint': target_endpoint_id})
+            if r.status_code == 200:
+                ides = r.json()
+        return render_template('listing.html', host_ip=host_ip, ides=ides)
+
+
 @remote.tokengetter
 def get_oauth_token():
     app.logger.info("get_oauth_token: getting or refreshing bearer token")
@@ -220,3 +241,7 @@ def get_oauth_token():
         session.pop('remote_oauth', None)
         return None
 
+
+def _is_logged():
+    tmp = session.get('remote_oauth')
+    return (tmp is not None and len(tmp) == 2 and tmp[0] is not None and tmp[1] is not None)
