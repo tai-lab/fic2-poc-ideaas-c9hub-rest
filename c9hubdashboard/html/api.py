@@ -10,6 +10,7 @@ from flask_oauthlib.client import OAuth
 from c9hubdashboard.forms import forms
 from flask_wtf.csrf import CsrfProtect
 from urllib.parse import urlparse, urlencode, urljoin
+from collections import namedtuple
 
 
 def __update_configuration(cfg):
@@ -216,6 +217,42 @@ def listing():
             if r.status_code == 200:
                 ides = r.json()
         return render_template('listing.html', host_ip=host_ip, ides=ides)
+
+
+@app.route('/delete', methods=['GET'])
+def deleting():
+    app.logger.info('delete (method={}): {}'.format(request.method, dict(request.args)))
+    host_ip = request.headers.get('X-Forwarded-Host', '0.0.0.0')
+    if get_oauth_token() is None:
+        app.logger.info('No token was found, redirecting to authorization server')
+        callback = "https://{}/authorize".format(host_ip)
+        return remote.authorize(callback=callback)
+    else:
+        CErrArgs = namedtuple('CErrArgs', ['title', 'msg', 'sub'])
+        err_args = CErrArgs("Missing uuid", "The IDE's id is missing", None)
+        target_uuid = request.args.get('id', None)
+        if (target_uuid):
+            target_endpoint_id = _fetch_validation_endpoint()
+            if target_endpoint_id is not None:
+                r = requests.delete('{}/v1/ide/{}'.format(C9HUB_API_PORT, target_uuid),
+                             headers={'Authorization': 'Bearer ' + get_oauth_token()[0], 'Content-Type': 'application/json', 'Validation-Endpoint': target_endpoint_id})
+                if r.status_code == 204:
+                    return redirect(url_for('listing', _scheme="https", _external=True))
+                else:
+                    err_args = CErrArgs("failed rest call",
+                                       "The rest endpoint returned an error for the delete action",
+                                       CErrArgs(r.status_code, r.text, None))
+            else:
+                err_args = CErrArgs("runtime error", "Unable to find a validation endpoint", None)
+        return render_template('error.html', **err_args._asdict())
+
+
+@app.route('/error')
+def page_error():
+    title = 'a'
+    msg = 'b'
+    next_hint = 'c'
+    return render_template('error.html', title=title, msg=msg, next_hint=next_hint)
 
 
 @remote.tokengetter

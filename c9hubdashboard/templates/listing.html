@@ -11,6 +11,7 @@
               <th>Name</th>
               <th>User</th>
               <th>Link</th>
+	      <th>Delete</th>
 	    </tr>
 	  </thead>
 	  <tbody>
@@ -19,6 +20,9 @@
               <td>{{ide['display_name']}}</td>
               <td>{{ide['user_id']}}</td>
               <td><a href="{{'https://{}:8080/{}'.format(host_ip, ide['container_id'])}}">{{ide['container_id']}}</a></td>
+	      <td>
+		<a href="delete?id={{ide.id}}" class="btn btn-sm btn-warning _btn-fab mdi-navigation-cancel" style="padding: 3px; margin: 0px;"></a>
+	      </td>
 	    </tr>
 	    {% endfor %}
 	  </tbody>

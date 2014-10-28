@@ -5,7 +5,7 @@ from c9hubapi.db import models
 import os, uuid
 import docker
 import pdb
-import re, random
+import re, random, sys
 from datetime import timedelta
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
@@ -66,7 +66,7 @@ class Ide(ACommon):
             abort(500, error=str(e))
         query = self.session.query(models.Ide).filter_by(uuid=target).first()
         if (query):
-            if not _check_current_user_vs(query.user_id, query.target_endpoint_id):
+            if not _check_current_user_vs(query.user_id, query.validation_endpoint_id):
                 return abort(401)
             docker = self.create_docker()
             try:
@@ -74,8 +74,8 @@ class Ide(ACommon):
                 docker.stop(query.container_id)
                 docker.wait(query.container_id)
                 docker.remove_container(query.container_id)
-            except docker.errors.APIError as e:
-                pass
+            except:
+                self.log.info("Ide.delete except: ", sys.exc_info()[0])
             self.session.delete(query)
             self.session.commit()
             return (None, 204, None)
