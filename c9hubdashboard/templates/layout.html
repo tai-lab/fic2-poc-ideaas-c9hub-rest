@@ -3,14 +3,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr" style="overflow-y: scroll;">
   <head>
     <!-- start bootstrap-material-design -->
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/css/material.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/css/ripples.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/css/material-wfont.min.css') }}" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/css/ripples.min.css') }}" rel="stylesheet"/>
+    <link href="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/css/material-wfont.min.css') }}" rel="stylesheet"/>
+    <link href="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/css/material.min.css') }}" rel="stylesheet"/>
     <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script src="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/js/ripples.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/js/material.min.js') }}"></script>
     <!-- end bootstrap-material-design -->
     
     <title>IDEaas - {% block title %}{% endblock %}</title>
@@ -42,5 +39,14 @@
     <div class="container">
       {% block section %}{% endblock %}
     </div>
+
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/js/ripples.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='lib/bower_components/bootstrap-material-design/dist/js/material.min.js') }}"></script>
+    <script>
+      $(function() {
+        $.material.init();
+        });
+    </script>
   </body>
 </html>

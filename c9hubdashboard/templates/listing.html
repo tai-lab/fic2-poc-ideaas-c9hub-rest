@@ -21,7 +21,7 @@
               <td>{{ide['user_id']}}</td>
               <td><a href="{{'https://{}:8080/{}'.format(host_ip, ide['container_id'])}}">{{ide['container_id']}}</a></td>
 	      <td>
-		<a href="delete?id={{ide.id}}" class="btn btn-sm btn-warning _btn-fab mdi-navigation-cancel" style="padding: 3px; margin: 0px;"></a>
+		<a href="delete?id={{ide.id}}" class="btn btn-lg btn-default _btn-fab mdi-action-highlight-remove" style="padding: 3px 9px; margin: 0px;"></a>
 	      </td>
 	    </tr>
 	    {% endfor %}

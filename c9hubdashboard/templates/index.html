@@ -38,7 +38,7 @@
 	    <form method="POST" action="/" class="form-horizontal">
 	      {{ form.hidden_tag() }}
 	      <fieldset>
-		<legend><i class="icon icon-material-add-box"></i> Spawn a new IDE</legend>
+		<legend><i class="icon mdi-content-add-box"></i> Create a new IDE</legend>
 		<div class="{{class_with_errors(form.display_name, 'form-group')}}">
 		  {{ form.display_name.label(for="display_name", class_="col-lg-2 control-label") }}
 		  <div class="col-lg-10">
@@ -62,51 +62,50 @@
 		<div class="form-group">
 		  <div class="col-lg-offset-2 col-lg-10">
 		      <div class="checkbox">
-			<label>{{ form.setup_cf(class_="bs-material") }}
-		    	  <span class="check"></span>Setup CloudFoundry login
+			<label>{{ form.setup_cf(class_="bs-material") }} Setup CloudFoundry login
 			</label>
 		      </div>
 		    <br />
 		    <div class="{{class_with_errors(form.cf_api_endpoint, 'form-group')}}">
 		      {{ form.cf_api_endpoint.label(for="cf_api_endpoint", class_="col-lg-2 control-label") }}
 		      <div class="col-lg-10">
-			{{ with_errors(form.cf_api_endpoint, size=64, class_="setup_cf form-control floating-label",
-			placeholder="The url of the CloudFoundry User Account and Authentication (UAA) server") }}
+			{{ with_errors(form.cf_api_endpoint, size=64, class_="setup_cf form-control") }}
+			<span class="help-block">The url of the CloudFoundry User Account and Authentication (UAA) server</span>
 		      </div>
 		    </div>
 		    <div class="{{class_with_errors(form.cf_username, 'form-group')}}">
 		      {{ form.cf_username.label(for="cf_username", class_="col-lg-2 control-label") }}
 		      <div class="col-lg-10">
-			{{ with_errors(form.cf_username, size=64, class_="setup_cf form-control floating-label",
-			placeholder="A CloudFoundry username") }}
+			{{ with_errors(form.cf_username, size=64, class_="setup_cf form-control") }}
+			<!-- <span class="help-block">A CloudFoundry username</span> -->
 		      </div>
 		    </div>
 		    <div class="{{class_with_errors(form.cf_password, 'form-group')}}">
 		      {{ form.cf_password.label(for="cf_username", class_="col-lg-2 control-label") }}
 		      <div class="col-lg-10">
-			{{ with_errors(form.cf_password, size=64, class_="setup_cf form-control floating-label",
-			placeholder="A CloudFoundry password") }}
+			{{ with_errors(form.cf_password, size=64, class_="setup_cf form-control") }}
+			<!-- <span class="help-block">A CloudFoundry password</span> -->
 		      </div>
 		    </div>
 		    <div class="{{class_with_errors(form.cf_org, 'form-group')}}">
 		      {{ form.cf_org.label(for="cf_org", class_="col-lg-2 control-label") }}
 		      <div class="col-lg-10">
-			{{ with_errors(form.cf_org, size=64, class_="setup_cf form-control floating-label",
-			placeholder="A CloudFoundry Organization") }}
+			{{ with_errors(form.cf_org, size=64, class_="setup_cf form-control") }}
+			<!-- <span class="help-block">A CloudFoundry Organization</span> -->
 		      </div>
 		    </div>
 		    <div class="{{class_with_errors(form.cf_spc, 'form-group')}}">
 		      {{ form.cf_spc.label(for="cf_spc", class_="col-lg-2 control-label") }}
 		      <div class="col-lg-10">
-			{{ with_errors(form.cf_spc, size=64, class_="setup_cf form-control floating-label",
-			placeholder="A CloudFoundry Space") }}
+			{{ with_errors(form.cf_spc, size=64, class_="setup_cf form-control") }}
+			<!-- <span class="help-block">A CloudFoundry Space</span> -->
 		      </div>
 		    </div>
 		  </div>
 		</div>
 		
 		<div class="form-group">
-		  <div class="col-lg-10 col-lg-offset-2">
+		  <div class="col-lg-10">
 		    <button class="btn btn-default">Cancel</button>
 		    <button type="submit" class="btn btn-primary">Submit</button>
 		  </div>
