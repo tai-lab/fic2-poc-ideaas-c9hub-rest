@@ -1,0 +1,18 @@
+#cloud-config
+
+write_files:
+  - path: '/etc/systemd/journald.conf.d/50-limit-journal-size.conf'
+    owner: 'root:root'
+    permissions: '0644'
+    content: |
+      [Journal]
+      Compress=yes
+      SystemMaxUse=500M
+      SystemMaxFileSize=10M
+
+coreos:
+  update:
+    reboot-strategy: 'off'
+  units:
+    - name: 'systemd-journald.service'
+      command: 'reload-or-restart'
