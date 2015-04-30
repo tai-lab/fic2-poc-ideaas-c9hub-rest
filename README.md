@@ -257,13 +257,6 @@ When the images are properly tagged and bound to the correct version, then they 
 The dashboard should be accessible via the `https` protocol on the `cloud-ides` host.
 In the content of the preceding example, the url to browse is `https://130.206.85.162/`.
 
-# Extra #
-
-doorkeeper
-[d](f)
-
-ddd
-
 
 
 [label]: url "title"

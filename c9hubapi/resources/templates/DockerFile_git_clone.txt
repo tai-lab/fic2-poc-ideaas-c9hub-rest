@@ -1,5 +1,5 @@
 FROM {{ base_image }}
-MAINTAINER Tai <tai@thalesgroup.com>
+MAINTAINER Tai <tai@tai.com>
 
 
 USER ubuntu
